@@ -1,5 +1,5 @@
 import { PaintInfo } from './components/Rectangle';
-import { SegmentInfo } from './store';
+import { SegmentInfo } from './store/core';
 
 /** 每帧宽度 px（按时间轴缩放变化） */
 export const FrameWidth = 10;

@@ -2,8 +2,7 @@ import type Konva from 'konva';
 import { Group, Layer, Stage, Rect } from 'react-konva';
 import { useRef, useState } from 'react';
 import { Rectangle } from './components/Rectangle';
-import { TrackHeight } from './utils';
-import { useTimelineStore, useSegmentList } from './store';
+import { updateSegment, useSegmentList, useTrackList } from './store';
 
 // 鼠标拖拽样式
 const changeMouseCursor =
@@ -21,17 +20,8 @@ export const Tracks = () => {
   const stageRef = useRef<Konva.Stage>(null);
 
   const [selectedId, setSelectedId] = useState('');
-  const tracksInfo = useTimelineStore((store) => store.tracks);
-  const updateSegment = useTimelineStore((store) => store.updateSegment);
 
-  const trackList = tracksInfo.map((x, index) => ({
-    id: x.id,
-    x: 0,
-    y: index * (TrackHeight * 1.2),
-    width: stageWidth,
-    height: TrackHeight, // 定值高度
-  }));
-
+  const trackList = useTrackList();
   const segmentList = useSegmentList();
   return (
     <Stage
@@ -50,7 +40,7 @@ export const Tracks = () => {
             key={track.id}
             x={track.x}
             y={track.y}
-            width={track.width}
+            width={stageWidth}
             height={track.height}
             fill="#f1f1f1"
           />
