@@ -1,8 +1,11 @@
-function App() {
+import { Tracks } from './Tracks';
 
+function App() {
   return (
-    <div>hello</div>
-  )
+    <div>
+      <Tracks></Tracks>
+    </div>
+  );
 }
 
-export default App
+export default App;
