@@ -13,6 +13,7 @@ export type SegmentInfo = {
 export type TrackInfo = {
   id: string;
   type: string;
+  trackIndex: number;
   segments: SegmentInfo[];
 };
 export const initialStates = {
@@ -20,6 +21,7 @@ export const initialStates = {
     {
       id: 'track-0',
       type: 'video',
+      trackIndex: 0,
       segments: [
         {
           id: 'segment-0',
@@ -45,6 +47,7 @@ export const initialStates = {
     {
       id: 'track-2',
       type: 'text',
+      trackIndex: 1,
       segments: [
         {
           id: 'segment-2',

@@ -16,21 +16,16 @@ export type PaintInfo = {
 interface RectangleProps {
   shape: PaintInfo;
   selected?: boolean;
-  onChange: (x: PaintInfo) => void;
+  onTransformEnd?: (x: PaintInfo) => void;
+  onDragEnd?: (x: PaintInfo) => void;
   onContextMenu?: (e: PointerEvent) => void;
   onSelect?: (shape: PaintInfo) => void;
 }
 
 export const Rectangle = (props: RectangleProps) => {
   const { shape, selected } = props;
-  const { onChange, onContextMenu, onSelect } = props;
+  const { onTransformEnd, onDragEnd, onContextMenu, onSelect } = props;
   const shapeProps = shape;
-  const handleChange = (info: PaintInfo) => {
-    onChange({
-      ...shapeProps,
-      ...info,
-    });
-  };
 
   const shapeRef = useRef<Konva.Group>(null);
   const handleSelect = () => {
@@ -50,7 +45,7 @@ export const Rectangle = (props: RectangleProps) => {
         draggable={true}
         onDragEnd={(e) => {
           const node = e.target;
-          handleChange({ ...shapeProps, x: node.x(), y: node.y() });
+          onDragEnd?.({ ...shapeProps, x: node.x(), y: node.y() });
         }}
         onTransformEnd={(e) => {
           const node = e.target;
@@ -58,7 +53,7 @@ export const Rectangle = (props: RectangleProps) => {
           node.scaleX(1);
           node.scaleY(1);
 
-          handleChange({
+          onTransformEnd?.({
             ...shapeProps,
             x: node.x(),
             y: node.y(),

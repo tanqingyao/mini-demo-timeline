@@ -2,7 +2,12 @@ import type Konva from 'konva';
 import { Group, Layer, Stage, Rect } from 'react-konva';
 import { useRef, useState } from 'react';
 import { Rectangle } from './components/Rectangle';
-import { updateSegment, useSegmentList, useTrackList } from './store';
+import {
+  ActionType,
+  actionsReducer,
+  useSegmentList,
+  useTrackList,
+} from './store';
 
 // 鼠标拖拽样式
 const changeMouseCursor =
@@ -23,6 +28,8 @@ export const Tracks = () => {
 
   const trackList = useTrackList();
   const segmentList = useSegmentList();
+  // console.log('xxx', segmentList);
+
   return (
     <Stage
       ref={stageRef}
@@ -61,7 +68,10 @@ export const Tracks = () => {
               onSelect={(shape) => {
                 setSelectedId(shape.id);
               }}
-              onChange={(segment) => updateSegment(segment)}
+              onTransformEnd={(segment) =>
+                actionsReducer(ActionType.Transform, segment)
+              }
+              onDragEnd={(segment) => actionsReducer(ActionType.Drag, segment)}
             />
           ))}
         </Group>
