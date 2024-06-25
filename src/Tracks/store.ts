@@ -1,8 +1,26 @@
 import { create } from 'zustand';
 import { combine } from 'zustand/middleware';
-import { TrackHeight, timestamp2pixel } from './utils';
+import { produce } from 'immer';
+import {
+  formatPaintInfo2SegmentInfo,
+  parseSegmentInfo2PaintInfo,
+} from './utils';
 import { type PaintInfo } from './components/Rectangle';
 
+export type SegmentInfo = {
+  id: string;
+  type: string;
+  trackRenderIndex: number;
+  targetTimeRange: {
+    start: number;
+    duration: number;
+  };
+};
+export type TrackInfo = {
+  id: string;
+  type: string;
+  segments: SegmentInfo[];
+};
 export const initialStates = {
   tracks: [
     {
@@ -54,27 +72,34 @@ export const initialStates = {
         },
       ],
     },
-  ],
+  ] as unknown as TrackInfo[],
 };
 
-export const useDraft = create(
+export const useTimelineStore = create(
   combine(initialStates, (set, get) => ({
-    updateTrack() {},
+    updateSegment(paintInfo: PaintInfo) {
+      const segmentInfo = formatPaintInfo2SegmentInfo(paintInfo);
+      set((store) =>
+        produce(store, (draft) => {
+          draft.tracks.forEach((track) => {
+            const targetSegment = track.segments.find(
+              (seg) => paintInfo.id === seg.id
+            );
+            if (targetSegment) {
+              targetSegment.targetTimeRange = segmentInfo.targetTimeRange;
+              targetSegment.trackRenderIndex = segmentInfo.trackRenderIndex;
+            }
+          });
+        })
+      );
+    },
   }))
 );
 
 export const useSegmentList = () => {
-  const tracksInfo = useDraft((store) => store.tracks);
-  const segmentList = tracksInfo.flatMap<PaintInfo>((track) =>
-    track.segments.map((segment) => ({
-      id: segment.id,
-      type: segment.type,
-      fill: segment.type === 'segment-video' ? '#f00' : '#00f',
-      x: timestamp2pixel(segment.targetTimeRange.start),
-      y: segment.trackRenderIndex * (TrackHeight * 1.2),
-      width: timestamp2pixel(segment.targetTimeRange.duration),
-      height: TrackHeight, // 定值高度
-    }))
+  const tracksInfo = useTimelineStore((store) => store.tracks);
+  const segmentList = tracksInfo.flatMap((track) =>
+    track.segments.map(parseSegmentInfo2PaintInfo)
   );
   return segmentList;
 };
