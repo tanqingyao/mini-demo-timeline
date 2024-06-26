@@ -1,30 +1,26 @@
-# React + TypeScript + Vite
+# 启动
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> pnpm i && pnpm dev
 
-Currently, two official plugins are available:
+## 整体思路
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+采用简单架构，store 和 dnd 两个全局变量可优化。store 中管理实际为 timeline 的视图模型，这里做草稿概念进行管理。
 
-## Expanding the ESLint configuration
+- 渲染层： 采用 react-konva ，利用数据驱动，不直接操作node（可优化项）。
+- 草稿层：zustand + immer 简单全局数据管理，利用 zustand 中 setState 做Action 操作（可撤销/回退），immer 中 draft 做 mutation 操作（原子粒度修改）。
+- 应用层：视图和逻辑分离，纯组件 + 业务逻辑。
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+目前实现功能：
 
-- Configure the top-level `parserOptions` property like this:
+1. 点击/拖拽新增元素至轨道
+2. 拉升/缩小元素宽度
+3. 拖拽元素位置，拖拽元素至其他轨/新建轨
+4. 元素位置与帧宽度对齐
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+## TODO
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+- 元素碰撞检测
+- 拖拽时高亮
+- 撤销/回退
+- 草稿还原/保存
+- more functions
