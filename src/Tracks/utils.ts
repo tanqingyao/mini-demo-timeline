@@ -134,3 +134,21 @@ export const generateClickMaterial = (type: 'video' | 'text'): PaintInfo => ({
   height: TrackHeight, // 定值高度
   updateTime: Date.now(),
 });
+
+/** 草稿解析为视图数据 */
+export const generateDragMaterial = (
+  type: 'video' | 'text',
+  pos: { x: number; y: number }
+): PaintInfo => ({
+  id: type + generateUuid(),
+  type: 'segment-' + type,
+  fill: type === 'video' ? ColorMap.Video : ColorMap.Text,
+  // 应获取当前时间轴数据
+  x: pos.x,
+  // 特判新增至最顶层
+  y: pos.y,
+  // mock视频2s,图片1s
+  width: type === 'video' ? timestamp2pixel(3000) : timestamp2pixel(1000),
+  height: TrackHeight, // 定值高度
+  updateTime: Date.now(),
+});

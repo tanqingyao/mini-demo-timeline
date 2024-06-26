@@ -10,7 +10,7 @@ type IDraft = WritableDraft<{
 const get = useTimelineStore.getState;
 const set = useTimelineStore.setState;
 
-/** 统一清空空轨 */
+/** clear empty track */
 const _clearEmptyTrackMutation = (draft: IDraft) => {
   const indexes = [
     ...new Set(draft.segments.map((x) => x.trackRenderIndex)),
@@ -33,7 +33,7 @@ const _clearEmptyTrackMutation = (draft: IDraft) => {
   console.log('清空空轨');
 };
 
-/** 更新segment位置 */
+/** update segment */
 const _updateSegmentMutation = (
   draft: IDraft,
   paintInfo: PaintInfo,
@@ -49,7 +49,7 @@ const _updateSegmentMutation = (
   console.log('update segment');
 };
 
-/** 更新segment位置 */
+/** add new segment */
 const _addSegmentMutation = (
   draft: IDraft,
   paintInfo: PaintInfo,
@@ -104,6 +104,20 @@ const moveSegmentOtherTrackAction = (
   );
 };
 
+/** 新增至已有轨道 */
+const addSegmentOtherTrackAction = (
+  paintInfo: PaintInfo,
+  targetIndex: number
+) => {
+  set((store) =>
+    produce(store, (draft) => {
+      _addSegmentMutation(draft, paintInfo, targetIndex);
+
+      _clearEmptyTrackMutation(draft);
+    })
+  );
+};
+
 /** move segment to new added track */
 const moveSegmentNewTrackAction = (
   paintInfo: PaintInfo,
@@ -114,6 +128,22 @@ const moveSegmentNewTrackAction = (
       _addTrackByIndexMutation(draft, targetIndex);
 
       _updateSegmentMutation(draft, paintInfo, targetIndex);
+
+      _clearEmptyTrackMutation(draft);
+    })
+  );
+};
+
+/** move segment to new added track */
+const addSegmentNewTrackAction = (
+  paintInfo: PaintInfo,
+  targetIndex: number
+) => {
+  set((store) =>
+    produce(store, (draft) => {
+      _addTrackByIndexMutation(draft, targetIndex);
+
+      _addSegmentMutation(draft, paintInfo, targetIndex);
 
       _clearEmptyTrackMutation(draft);
     })
@@ -146,6 +176,20 @@ const dragSegment = (paintInfo: PaintInfo) => {
   }
 };
 
+const dragMaterial = (paintInfo: PaintInfo) => {
+  const tracksCount = get().getTracksIndex().length;
+
+  const { targetInEmpty, targetIndex } = findProperTrackIndex(
+    paintInfo,
+    tracksCount
+  );
+
+  if (targetInEmpty) {
+    addSegmentNewTrackAction(paintInfo, targetIndex);
+  } else {
+    addSegmentOtherTrackAction(paintInfo, targetIndex);
+  }
+};
 export enum ActionType {
   ClickMaterial = 'ClickMaterial',
   DragMaterial = 'DragMaterial',
@@ -170,6 +214,10 @@ export const actionsReducer = (
     case ActionType.ClickMaterial:
       // 新增至最顶层
       clickMaterialAction(paintInfo, 0);
+      break;
+    case ActionType.DragMaterial:
+      // TODO 拖动目标位置高亮，用户感知不明显
+      dragMaterial(paintInfo);
       break;
     default:
       break;

@@ -5,7 +5,6 @@ import { useTimelineStore } from './core';
 export const useSegmentList = () => {
   const segments = useTimelineStore((store) => store.segments);
   const segmentList = segments.map(parseSegmentInfo2PaintInfo);
-  console.log('xxx', { segmentList });
 
   return segmentList;
 };
@@ -20,8 +19,6 @@ export const useTrackList = () => {
     // width: stageWidth,
     height: TrackHeight, // 定值高度
   }));
-
-  console.log('xxx', { trackList });
 
   return trackList;
 };
