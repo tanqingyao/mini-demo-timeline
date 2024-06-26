@@ -48,6 +48,34 @@ const _updateSegmentMutation = (
   }
   console.log('update segment');
 };
+
+/** 更新segment位置 */
+const _addSegmentMutation = (
+  draft: IDraft,
+  paintInfo: PaintInfo,
+  targetIndex?: number
+) => {
+  const targetSegment = formatPaintInfo2SegmentInfo(paintInfo);
+
+  targetSegment.updateTime = Date.now(); // forceUpdate react
+  if (targetIndex !== undefined) {
+    targetSegment.trackRenderIndex = targetIndex;
+  }
+  draft.segments.push(targetSegment);
+  console.log('add new segment');
+};
+
+/** add new track by index */
+const _addTrackByIndexMutation = (draft: IDraft, targetIndex: number) => {
+  // 后续所有轨道 trackRenderIndex 新增1
+  draft.segments.forEach((seg) => {
+    if (seg.trackRenderIndex >= targetIndex) {
+      seg.trackRenderIndex += 1;
+    }
+  });
+  console.log('新增轨道');
+};
+
 const findSegmentInfoById = (segmentId: string, segments: SegmentInfo[]) => {
   const targetSegment = segments.find((seg) => segmentId === seg.id);
   assert(targetSegment !== undefined);
@@ -83,13 +111,7 @@ const moveSegmentNewTrackAction = (
 ) => {
   set((store) =>
     produce(store, (draft) => {
-      // 后续所有轨道 trackRenderIndex 新增1
-      draft.segments.forEach((seg) => {
-        if (seg.trackRenderIndex >= targetIndex) {
-          seg.trackRenderIndex += 1;
-        }
-      });
-      console.log('新增轨道');
+      _addTrackByIndexMutation(draft, targetIndex);
 
       _updateSegmentMutation(draft, paintInfo, targetIndex);
 
@@ -98,6 +120,17 @@ const moveSegmentNewTrackAction = (
   );
 };
 
+const clickMaterialAction = (paintInfo: PaintInfo, targetIndex: number) => {
+  set((store) =>
+    produce(store, (draft) => {
+      _addTrackByIndexMutation(draft, targetIndex);
+
+      _addSegmentMutation(draft, paintInfo, targetIndex);
+
+      _clearEmptyTrackMutation(draft);
+    })
+  );
+};
 const dragSegment = (paintInfo: PaintInfo) => {
   const tracksCount = get().getTracksIndex().length;
 
@@ -112,9 +145,12 @@ const dragSegment = (paintInfo: PaintInfo) => {
     moveSegmentOtherTrackAction(paintInfo, targetIndex);
   }
 };
+
 export enum ActionType {
-  Drag = 'Drag',
-  Transform = 'Transform',
+  ClickMaterial = 'ClickMaterial',
+  DragMaterial = 'DragMaterial',
+  DragSegment = 'DragSegment',
+  TransformSegment = 'TransformSegment',
 }
 
 export const actionsReducer = (
@@ -122,15 +158,19 @@ export const actionsReducer = (
   paintInfo: PaintInfo
 ) => {
   switch (actionType) {
-    case ActionType.Transform:
+    case ActionType.TransformSegment:
       // TODO 元素碰撞检测
       transformSegmentAction(paintInfo);
       break;
 
-    case ActionType.Drag:
+    case ActionType.DragSegment:
       dragSegment(paintInfo);
       break;
 
+    case ActionType.ClickMaterial:
+      // 新增至最顶层
+      clickMaterialAction(paintInfo, 0);
+      break;
     default:
       break;
   }

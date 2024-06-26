@@ -1,4 +1,5 @@
 import { assert } from '../base/assert';
+import { generateUuid } from '../base/uuid';
 import { PaintInfo } from './components/Rectangle';
 import { SegmentInfo } from './store/core';
 
@@ -100,16 +101,36 @@ export const formatPaintInfo2SegmentInfo = (
   };
 };
 
+export enum ColorMap {
+  Video = '#f80',
+  Text = '#08f',
+}
+
 /** 草稿解析为视图数据 */
 export const parseSegmentInfo2PaintInfo = (
   segment: SegmentInfo
 ): PaintInfo => ({
   id: segment.id,
   type: segment.type,
-  fill: segment.type === 'segment-video' ? '#f00' : '#00f',
+  fill: segment.type === 'segment-video' ? ColorMap.Video : ColorMap.Text,
   x: timestamp2pixel(segment.targetTimeRange.start),
   y: segment.trackRenderIndex * (TrackHeight * 1.2),
   width: timestamp2pixel(segment.targetTimeRange.duration),
   height: TrackHeight, // 定值高度
   updateTime: segment.updateTime,
+});
+
+/** 草稿解析为视图数据 */
+export const generateClickMaterial = (type: 'video' | 'text'): PaintInfo => ({
+  id: type + generateUuid(),
+  type: 'segment-' + type,
+  fill: type === 'video' ? ColorMap.Video : ColorMap.Text,
+  // 应获取当前时间轴数据
+  x: 0,
+  // 特判新增至最顶层
+  y: -1,
+  // mock视频2s,图片1s
+  width: type === 'video' ? timestamp2pixel(3000) : timestamp2pixel(1000),
+  height: TrackHeight, // 定值高度
+  updateTime: Date.now(),
 });

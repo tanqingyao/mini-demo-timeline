@@ -69,9 +69,11 @@ export const Tracks = () => {
                 setSelectedId(shape.id);
               }}
               onTransformEnd={(segment) =>
-                actionsReducer(ActionType.Transform, segment)
+                actionsReducer(ActionType.TransformSegment, segment)
               }
-              onDragEnd={(segment) => actionsReducer(ActionType.Drag, segment)}
+              onDragEnd={(segment) =>
+                actionsReducer(ActionType.DragSegment, segment)
+              }
             />
           ))}
         </Group>
