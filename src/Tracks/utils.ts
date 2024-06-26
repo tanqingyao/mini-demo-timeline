@@ -52,7 +52,7 @@ export const findProperTrackIndex = (
   // 大于最后轨道
   const lastTrackIndex = tracksCount - 1;
   if (paintCenterY >= TrackHeight * 1.2 * lastTrackIndex + TrackHeight) {
-    return { targetIndex: lastTrackIndex, targetInEmpty: true };
+    return { targetIndex: lastTrackIndex + 1, targetInEmpty: true };
   }
 
   for (let i = 0; i < tracksCount; i++) {
