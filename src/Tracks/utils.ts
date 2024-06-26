@@ -1,6 +1,6 @@
 import { assert } from '../base/assert';
 import { PaintInfo } from './components/Rectangle';
-import { SegmentInfo, TrackInfo } from './store/core';
+import { SegmentInfo } from './store/core';
 
 /** 每帧宽度 px（按时间轴缩放变化） */
 export const FrameWidth = 10;
@@ -35,13 +35,10 @@ const pixel2timestamp = (position: number) =>
 /** 找出 paintInfo 位于轨道区的index或者空白区的index */
 export const findProperTrackIndex = (
   paintInfo: PaintInfo,
-  tracksInfo: TrackInfo[]
+  tracksCount: number
 ) => {
   // 轨道 y 坐标范围: [TrackHeight * 1.2 * index, TrackHeight * 1.2 * index + TrackHeight]
   // 空白 y 坐标范围: [TrackHeight * 1.2 * index - TrackHeight, TrackHeight * 1.2 * index]
-  // const targetTrackIndex = 0;
-  // const targetEmptyIndex = 0;
-
   let targetIndex: number | null = null;
   let targetInEmpty = false;
 
@@ -53,11 +50,12 @@ export const findProperTrackIndex = (
   }
 
   // 大于最后轨道
-  if (paintCenterY >= TrackHeight * 1.2 * tracksInfo.length - TrackHeight) {
-    return { targetIndex: tracksInfo.length - 1, targetInEmpty: true };
+  const lastTrackIndex = tracksCount - 1;
+  if (paintCenterY >= TrackHeight * 1.2 * lastTrackIndex + TrackHeight) {
+    return { targetIndex: lastTrackIndex, targetInEmpty: true };
   }
 
-  for (let i = 0; i < tracksInfo.length; i++) {
+  for (let i = 0; i < tracksCount; i++) {
     const trackTopY = TrackHeight * 1.2 * i;
     const trackBottomY = trackTopY + TrackHeight;
 
@@ -82,7 +80,7 @@ export const findProperTrackIndex = (
     }
   }
   // 应该找到最终 index
-  assert(!(targetIndex === null));
+  assert(targetIndex !== null);
 
   return { targetIndex, targetInEmpty };
 };
@@ -113,4 +111,5 @@ export const parseSegmentInfo2PaintInfo = (
   y: segment.trackRenderIndex * (TrackHeight * 1.2),
   width: timestamp2pixel(segment.targetTimeRange.duration),
   height: TrackHeight, // 定值高度
+  updateTime: segment.updateTime,
 });

@@ -11,6 +11,7 @@ export type PaintInfo = {
   y: number;
   width: number;
   height: number;
+  updateTime?: number; // using timestamp force update
 };
 
 interface RectangleProps {
@@ -34,9 +35,13 @@ export const Rectangle = (props: RectangleProps) => {
 
   const borderRadius = shapeProps.width > 2 ? 2 : 0;
 
+  // 用于更新 react 更新组件，若直接操作node则不需要
+  const reactNodeKey = shape.updateTime;
+
   return (
     <>
       <Group
+        key={reactNodeKey + shape.id}
         ref={shapeRef}
         {...shapeProps}
         onContextMenu={(e) => onContextMenu?.(e.evt)}
@@ -71,7 +76,9 @@ export const Rectangle = (props: RectangleProps) => {
           fill={shape.fill}
         />
       </Group>
-      {selected && <ShapePaddle shapeRef={shapeRef} />}
+      {selected && (
+        <ShapePaddle shapeRef={shapeRef} key={reactNodeKey + 'ShapePaddle'} />
+      )}
     </>
   );
 };

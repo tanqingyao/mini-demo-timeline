@@ -1,23 +1,27 @@
+import { generateUuid } from '../../base/uuid';
 import { TrackHeight, parseSegmentInfo2PaintInfo } from '../utils';
 import { useTimelineStore } from './core';
 
 export const useSegmentList = () => {
-  const tracksInfo = useTimelineStore((store) => store.tracks);
-  const segmentList = tracksInfo.flatMap((track) =>
-    track.segments.map(parseSegmentInfo2PaintInfo)
-  );
+  const segments = useTimelineStore((store) => store.segments);
+  const segmentList = segments.map(parseSegmentInfo2PaintInfo);
+  console.log('xxx', { segmentList });
+
   return segmentList;
 };
 
 export const useTrackList = () => {
-  const tracksInfo = useTimelineStore((store) => store.tracks);
-  const trackList = tracksInfo.map((x, index) => ({
-    id: x.id,
+  const trackRenderIndexArray = useTimelineStore.getState().getTracksIndex();
+  const trackList = trackRenderIndexArray.map((x, index) => ({
+    id: `${x}::${generateUuid()}`,
     x: 0,
     y: index * (TrackHeight * 1.2),
     // 轨道宽度为画布宽度
     // width: stageWidth,
     height: TrackHeight, // 定值高度
   }));
+
+  console.log('xxx', { trackList });
+
   return trackList;
 };

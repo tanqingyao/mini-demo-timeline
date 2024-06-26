@@ -9,6 +9,7 @@ export type SegmentInfo = {
     start: number;
     duration: number;
   };
+  updateTime?: number; // using timestamp forceUpdate react
 };
 export type TrackInfo = {
   id: string;
@@ -16,7 +17,7 @@ export type TrackInfo = {
   trackIndex: number;
   segments: SegmentInfo[];
 };
-export const initialStates = {
+const _draft = {
   tracks: [
     {
       id: 'track-0',
@@ -72,6 +73,20 @@ export const initialStates = {
   ] as unknown as TrackInfo[],
 };
 
+const initialStates = {
+  segments: _draft.tracks.flatMap((track) => track.segments),
+};
+
+/** 轨道视图模型 */
 export const useTimelineStore = create(
-  combine(initialStates, (set, get) => ({}))
+  combine(initialStates, (set, get) => ({
+    getTracksIndex: () => {
+      const trackRenderIndexArray = [
+        ...new Set(get().segments.map((x) => x.trackRenderIndex)),
+      ];
+      return trackRenderIndexArray;
+    },
+  }))
 );
+
+(window as any).__debugger__ = useTimelineStore;
